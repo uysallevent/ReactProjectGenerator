@@ -21,46 +21,42 @@ namespace ReactProjectGenerator
         {
             try
             {
-                MainAsync(args).Wait();
+                ProjectGenerationManagement();
+                NpmPackageManagement();
+                FolderManagement();
             }
             catch (Exception ex)
             {
-
+                Console.WriteLine(ex.Message);
                 throw;
             }
         }
 
-        static async Task MainAsync(string[] args)
-        {
-            ProjectGenerationManagement().Wait();
-            NpmPackageManagement().Wait();
-            FolderManagement().Wait();
-        }
 
-        private static async Task ProjectGenerationManagement()
+        private static void ProjectGenerationManagement()
         {
-            var projectGenerationScript = await ScriptReaderHelper.ReadScriptFile("CreateReactAppScript.txt");
-            await RunScript(
-            projectGenerationScript,
-            AppDomain.CurrentDomain.BaseDirectory,
-            "Project generation process has been started. Please wait !!!");
+            var projectGenerationScript = ScriptReaderHelper.ReadScriptFile("CreateReactAppScript.txt");
+            RunScript(
+           projectGenerationScript,
+           AppDomain.CurrentDomain.BaseDirectory,
+           "Project generation process has been started. Please wait !!!");
             projectPath = projectPath ?? $"{AppDomain.CurrentDomain.BaseDirectory}{projectGenerationScript.Split(" ").Last()}";
         }
 
-        private static async Task NpmPackageManagement()
+        private static void NpmPackageManagement()
         {
             var path = $"{AppDomain.CurrentDomain.BaseDirectory}Scripts\\NpmPackageList.txt";
-            var content = await File.ReadAllLinesAsync(path);
+            var content = File.ReadAllLines(path);
             if (content == null || content.Length == 0)
             {
-                await Console.Out.WriteLineAsync("There is no npm packages found for installing");
+                Console.WriteLine("There is no npm packages found for installing");
                 return;
             }
 
-            await RunScript(
-            $"npm install { string.Join(" ", content)}",
-            projectPath,
-            "Npm package installation process has been started. Please wait !!!");
+            RunScript(
+           $"npm install { string.Join(" ", content)}",
+           projectPath,
+           "Npm package installation process has been started. Please wait !!!");
         }
 
         private static async Task FolderManagement()
@@ -79,7 +75,7 @@ namespace ReactProjectGenerator
                 if (item.Split(".").Last().ToLower() == "js" || item.Split(".").Last().ToLower() == "jsx")
                 {
                     var fileInfo = new FileInfo($"{srcPath}\\{item}");
-                    if(!Directory.Exists(fileInfo.DirectoryName))
+                    if (!Directory.Exists(fileInfo.DirectoryName))
                     {
                         Directory.CreateDirectory(fileInfo.DirectoryName);
                     }
@@ -93,7 +89,7 @@ namespace ReactProjectGenerator
             }
         }
 
-        private static async Task RunScript(string script, string executePath, string waitingMessage)
+        private static void RunScript(string script, string executePath, string waitingMessage)
         {
             using (Runspace runspace = RunspaceFactory.CreateRunspace())
             {
@@ -104,8 +100,8 @@ namespace ReactProjectGenerator
                     pipeline.Commands.AddScript(script);
                     pipeline.InvokeAsync();
 
-                    await Console.Out.WriteLineAsync(waitingMessage);
-                    await Console.Out.WriteLineAsync($">>>>>>{script}");
+                    Console.WriteLine(waitingMessage);
+                    Console.WriteLine($">>>>>>{script}");
 
                     while (pipeline.PipelineStateInfo.State == PipelineState.Running || pipeline.PipelineStateInfo.State == PipelineState.Stopping)
                     {

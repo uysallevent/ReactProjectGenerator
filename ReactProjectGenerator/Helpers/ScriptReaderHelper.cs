@@ -9,15 +9,15 @@ namespace ReactProjectGenerator.Helpers
 {
     public static class ScriptReaderHelper
     {
-        public static async Task<string> ReadScriptFile(string scriptFileName)
+        public static string ReadScriptFile(string scriptFileName)
         {
             var path = $"{AppDomain.CurrentDomain.BaseDirectory}Scripts\\{scriptFileName}";
-            var content = await File.ReadAllTextAsync(path);
-            var script = await InputChecker(content);
+            var content = File.ReadAllText(path);
+            var script = InputChecker(content);
             return script;
         }
 
-        private static async Task<string> InputChecker(string content)
+        private static string InputChecker(string content)
         {
             if (content.Contains(":{") || content.Contains("}:"))
             {
@@ -26,7 +26,7 @@ namespace ReactProjectGenerator.Helpers
                 {
                     var schemaName = content.Substring(content.IndexOf(":{"), (content.IndexOf("}:") - content.IndexOf(":{")) + 2);
 
-                    await Console.Out.WriteAsync($"Please enter a {schemaName.Replace(":{", "").Replace("}:", "")} :");
+                    Console.WriteLine($"Please enter a {schemaName.Replace(":{", "").Replace("}:", "")} :");
 
                 repeat:
                     var inputValue = Console.ReadLine();
@@ -39,7 +39,6 @@ namespace ReactProjectGenerator.Helpers
                         Console.SetCursorPosition($"Please enter a {schemaName.Replace(":{", "").Replace("}:", "")} :".Length, 0);
                         goto repeat;
                     }
-
                 }
                 return content;
             }
