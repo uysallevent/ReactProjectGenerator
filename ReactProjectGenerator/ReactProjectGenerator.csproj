@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Scripts\InstallNpmPackagesScript.txt">
+    <None Update="Scripts\FolderAndFiles.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Scripts\NpmPackageList.txt">

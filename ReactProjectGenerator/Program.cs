@@ -15,6 +15,8 @@ namespace ReactProjectGenerator
 {
     class Program
     {
+        static string projectPath = null;
+
         static void Main(string[] args)
         {
             try
@@ -30,33 +32,95 @@ namespace ReactProjectGenerator
 
         static async Task MainAsync(string[] args)
         {
-            var script = await ScriptReaderHelper.ReadScriptFile("CreateReactAppScript.txt");
-            await RunScript(script, "Project generation process has been started. Please wait !!!", "Project has been generated");
+            ProjectGenerationManagement().Wait();
+            NpmPackageManagement().Wait();
+            FolderManagement().Wait();
+        }
 
+        private static async Task ProjectGenerationManagement()
+        {
+            var projectGenerationScript = await ScriptReaderHelper.ReadScriptFile("CreateReactAppScript.txt");
+            await RunScript(
+            projectGenerationScript,
+            AppDomain.CurrentDomain.BaseDirectory,
+            "Project generation process has been started. Please wait !!!");
+            projectPath = projectPath ?? $"{AppDomain.CurrentDomain.BaseDirectory}{projectGenerationScript.Split(" ").Last()}";
+        }
+
+        private static async Task NpmPackageManagement()
+        {
             var path = $"{AppDomain.CurrentDomain.BaseDirectory}Scripts\\NpmPackageList.txt";
             var content = await File.ReadAllLinesAsync(path);
-            await RunScript(
-                $"cd {AppDomain.CurrentDomain.BaseDirectory}\\test" +
-                $"npm install { string.Join(" ", content)}", "Npm package installation process has been started", "Npm packages installation completed");
+            if (content == null || content.Length == 0)
+            {
+                await Console.Out.WriteLineAsync("There is no npm packages found for installing");
+                return;
+            }
 
+            await RunScript(
+            $"npm install { string.Join(" ", content)}",
+            projectPath,
+            "Npm package installation process has been started. Please wait !!!");
         }
 
-
-        private static async Task RunScript(string script, string waitingMessage, string resultMessage)
+        private static async Task FolderManagement()
         {
-            using (PowerShell PowerShellInstance = PowerShell.Create())
+            var path = $"{AppDomain.CurrentDomain.BaseDirectory}Scripts\\FolderAndFiles.txt";
+            var content = await File.ReadAllLinesAsync(path);
+            if (content == null || content.Length == 0)
             {
-                PowerShellInstance.AddScript(script);
+                await Console.Out.WriteLineAsync("There is no folder or file found for creating");
+                return;
+            }
 
-                IAsyncResult result = PowerShellInstance.BeginInvoke();
-                await Console.Out.WriteLineAsync(waitingMessage);
-                while (result.IsCompleted == false)
+            var srcPath = $"{projectPath}\\src";
+            foreach (var item in content)
+            {
+                if (item.Split(".").Last().ToLower() == "js" || item.Split(".").Last().ToLower() == "jsx")
                 {
-                    ConsoleSpinnerHelper.Turn();
+                    var fileInfo = new FileInfo($"{srcPath}\\{item}");
+                    if(!Directory.Exists(fileInfo.DirectoryName))
+                    {
+                        Directory.CreateDirectory(fileInfo.DirectoryName);
+                    }
+
+                    File.Create($"{srcPath}\\{item}");
                 }
-                await Console.Out.WriteLineAsync(resultMessage);
-                PowerShellInstance.Dispose();
+                else
+                {
+                    Directory.CreateDirectory($"{srcPath}\\{item}");
+                }
             }
         }
+
+        private static async Task RunScript(string script, string executePath, string waitingMessage)
+        {
+            using (Runspace runspace = RunspaceFactory.CreateRunspace())
+            {
+                runspace.Open();
+                runspace.SessionStateProxy.Path.SetLocation(executePath);
+                using (Pipeline pipeline = runspace.CreatePipeline())
+                {
+                    pipeline.Commands.AddScript(script);
+                    pipeline.InvokeAsync();
+
+                    await Console.Out.WriteLineAsync(waitingMessage);
+                    await Console.Out.WriteLineAsync($">>>>>>{script}");
+
+                    while (pipeline.PipelineStateInfo.State == PipelineState.Running || pipeline.PipelineStateInfo.State == PipelineState.Stopping)
+                    {
+                        ConsoleSpinnerHelper.Turn();
+                    }
+
+                    foreach (object item in pipeline.Error.ReadToEnd())
+                    {
+                        if (item != null)
+                            Console.WriteLine(item.ToString());
+                    }
+                }
+                runspace.Close();
+            }
+        }
+
     }
 }
