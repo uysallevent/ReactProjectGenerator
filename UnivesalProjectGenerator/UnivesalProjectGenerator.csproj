@@ -18,15 +18,19 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Scripts\FolderAndFiles.txt">
+    <None Update="ProjectTypes\React\Scripts\FolderAndFiles.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Scripts\NpmPackageList.txt">
+    <None Update="ProjectTypes\React\Scripts\NpmPackageList.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Scripts\CreateReactAppScript.txt">
+    <None Update="ProjectTypes\React\Scripts\CreateReactAppScript.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Models\" />
   </ItemGroup>
 
 </Project>
