@@ -1,29 +1,32 @@
-﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+﻿using CommandLine;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using ReactProjectGenerator.Helpers;
 using System;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Management.Automation;
 using System.Management.Automation.Runspaces;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace ReactProjectGenerator
 {
-    class Program
+    static class Program
     {
+        readonly static string commandprefix = "test";
         static string projectPath = null;
 
         static void Main(string[] args)
         {
+
             try
             {
-                ProjectGenerationManagement();
-                NpmPackageManagement();
-                FolderManagement();
+
+                //ProjectGenerationManagement();
+                //NpmPackageManagement();
+                //FolderManagement();
             }
             catch (Exception ex)
             {
@@ -32,6 +35,20 @@ namespace ReactProjectGenerator
             }
         }
 
+        //private async Task WaitCommand()
+        //{
+        //    Console.WriteLine("Waiting your command :");
+        //    Console.ReadLine();
+        //}
+
+        private static Dictionary<string[], Func<string, Task>> GetCommandList()
+        {
+            return new Dictionary<string[], Func<string, Task>>()
+            {
+                 { new string[]{"test1", "run" }, async (c) =>{}},
+                 { new string[]{"test2", "run" }, async (c) =>{}}
+            };
+        }
 
         private static void ProjectGenerationManagement()
         {
@@ -59,13 +76,13 @@ namespace ReactProjectGenerator
            "Npm package installation process has been started. Please wait !!!");
         }
 
-        private static async Task FolderManagement()
+        private static void FolderManagement()
         {
             var path = $"{AppDomain.CurrentDomain.BaseDirectory}Scripts\\FolderAndFiles.txt";
-            var content = await File.ReadAllLinesAsync(path);
+            var content = File.ReadAllLines(path);
             if (content == null || content.Length == 0)
             {
-                await Console.Out.WriteLineAsync("There is no folder or file found for creating");
+                Console.WriteLine("There is no folder or file found for creating");
                 return;
             }
 
