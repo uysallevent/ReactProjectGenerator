@@ -10,16 +10,17 @@ namespace UniversalProjectGenerator.Helpers
         static int counter;
         public static void Turn()
         {
-            counter++;
-            switch (counter % 4)
-            {
-                case 0: Console.Write("/"); counter = 0; break;
-                case 1: Console.Write("-"); break;
-                case 2: Console.Write("\\"); break;
-                case 3: Console.Write("|"); break;
+                counter++;
+                switch (counter % 4)
+                {
+                    case 0: Console.Write("/"); counter = 0; break;
+                    case 1: Console.Write("-"); break;
+                    case 2: Console.Write("\\"); break;
+                    case 3: Console.Write("|"); break;
+                }
+                Thread.Sleep(100);
+                Console.SetCursorPosition(Console.CursorLeft != 0 ? Console.CursorLeft - 1 : 0, Console.CursorTop);
             }
-            Thread.Sleep(100);
-            Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
         }
     }
 }

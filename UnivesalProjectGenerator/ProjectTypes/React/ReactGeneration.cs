@@ -15,10 +15,11 @@ namespace UnivesalProjectGenerator.ProjectTypes.React
 
         public static async Task Generate()
         {
-            await FileWatcherHelper.WatchFile(AppDomain.CurrentDomain.BaseDirectory);
             await ProjectGenerationManagement().ConfigureAwait(false);
             await NpmPackageManagement();
             await FolderManagement();
+            await FileWatcherHelper.WatchFile(AppDomain.CurrentDomain.BaseDirectory);
+
         }
 
         private static async Task ProjectGenerationManagement()
@@ -29,7 +30,7 @@ namespace UnivesalProjectGenerator.ProjectTypes.React
                 AppDomain.CurrentDomain.BaseDirectory,
                 "Project generation process has been started. Please wait !!!").ConfigureAwait(false);
 
-            projectPath ??= $"{AppDomain.CurrentDomain.BaseDirectory}{projectGenerationScript.Split(" ").Last()}";
+            projectPath = $"{AppDomain.CurrentDomain.BaseDirectory}{projectGenerationScript.Split(" ").Last()}";
         }
 
         private static async Task NpmPackageManagement()

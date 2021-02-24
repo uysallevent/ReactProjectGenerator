@@ -11,7 +11,6 @@ namespace UniversalProjectGenerator
 {
     static class Program
     {
-        static string projectPath;
         static StringArrayComparer stringArrayComparer;
 
         static void Main(string[] args)
@@ -43,6 +42,7 @@ namespace UniversalProjectGenerator
         {
             while (true)
             {
+                await Console.Out.WriteLineAsync("").ConfigureAwait(false);
                 await Console.Out.WriteLineAsync("Waiting your command :").ConfigureAwait(false);
                 await ExecuteCommandAsync(Console.ReadLine().Split(' ').Select(p => p.ToLowerInvariant()).ToArray());
             }
